@@ -31,15 +31,19 @@ class Voter(models.Model):
     voter_id = models.CharField(max_length=60, default='', primary_key=True)
 
     # Name-related parameters
-    first_name = models.CharField(max_length=32, default='', db_index=True)
-    middle_name = models.CharField(max_length=32, default='', db_index=True)
-    last_name = models.CharField(max_length=32, default='', db_index=True)
+    first_name = models.CharField(max_length=32, default='')
+    middle_name = models.CharField(max_length=32, default='')
+    last_name = models.CharField(max_length=32, default='')
     suffix = models.CharField(max_length=32, default='')
 
-    # Residential address components. ZIP can be ZIP+4
+    # Combination of above name parameters. Created on save.
+    full_name = models.CharField(max_length=128, default='', blank=True,
+                                 db_index=True)
+
+    # Residential address components. ZIP is shortened from ZIP+4 for simplicity
     # Full address and ZIP are indexed.
     res_addr = models.CharField(max_length=70, default='', db_index=True)
-    res_addr_zip = models.CharField(max_length=10, default='', db_index=True)
+    res_addr_zip = models.CharField(max_length=5, default='', db_index=True)
     res_addr_city = models.CharField(max_length=30, default='')
     res_addr_state = models.CharField(max_length=2, default='')
     res_addr_house_num = models.CharField(max_length=10, default='')
@@ -65,11 +69,15 @@ class Voter(models.Model):
     language = models.CharField(max_length=16, default='')
 
     def __str__(self):
-        return "%s %s (%s)" % (self.first_name, self.last_name, self.res_addr)
+        return "%s (%s)" % (self.full_name, self.res_addr)
 
-    def get_full_name(self):
+    def save(self, *args, **kwargs):
+        """
+        Updates the full_name, then saves.
+        """
         names = [self.first_name, self.middle_name, self.last_name, self.suffix]
-        return ' '.join(filter(lambda s: s != '', names))
+        self.full_name = ' '.join(filter(lambda s: s != '', names))
+        super(Voter, self).save(*args, **kwargs)
 
 
 class Campaign(models.Model):
@@ -120,7 +128,7 @@ class ValidationRecord(models.Model):
                                  db_index=True)
     campaign_pk = models.IntegerField(blank=True)
 
-    # Voter information, including denormalized fields.
+    # Voter information, including denormalized fields for backup.
     voter = models.ForeignKey(Voter, null=True, on_delete=models.SET_NULL)
     voter_full_name = models.CharField(max_length=100, default='', blank=True)
     voter_res_address = models.CharField(max_length=70, default='', blank=True)
@@ -137,8 +145,8 @@ class ValidationRecord(models.Model):
         if self.campaign is not None:
             self.campaign_pk = self.campaign.pk
         if self.voter is not None:
-            # Denormalized fields for backup and easy search.
-            self.voter_full_name = self.voter.get_full_name()
+            # Denormalized fields for backup.
+            self.voter_full_name = self.voter.full_name
             self.voter_res_address = self.voter.res_addr
             self.voter_uid = self.voter.voter_id
         super(ValidationRecord, self).save(*args, **kwargs)

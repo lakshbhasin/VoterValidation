@@ -4,36 +4,27 @@ Search-related functions and variables
 import re
 
 from django.contrib.postgres.search import SearchVector, SearchRank, \
-    SearchQuery, \
-    TrigramSimilarity
-from django.db.models import Q
+    SearchQuery, TrigramSimilarity
+from django.db.models import Q, F
 
-from .models import UserProfile
+from .models import UserProfile, Voter
 from .serializers import VoterSerializer
 
-# Fields used in computing trigram similarity
-USER_TRIGRAM_SIM_FIELDS = ['user__username', 'user__first_name',
-                           'user__last_name', 'description']
-TEAM_TRIGRAM_SIM_FIELDS = ['name', 'description']
-
-# Search vectors for user and team search. Used for ranking in non-typeahead
-# search. Some features from trigram similarity are left off to save
-# computation.
-USER_SEARCH_VECTOR = SearchVector('user__username', weight='A') \
-                     + SearchVector('description', weight='B')
-
-TEAM_SEARCH_VECTOR = SearchVector('name', weight='A') \
-                     + SearchVector('description', weight='B')
-
 ALPHANUMERIC_REGEX = re.compile(r'\W+', re.UNICODE)
+
+# Fields used in computing trigram similarity for Voter searches (fuzzy search)
+FULL_NAME_TRIGRAM_SIM_FIELDS = ['full_name']  # is a combination of all names
+RES_ADDR_TRIGRAM_SIM_FIELDS = ['res_addr']
+FULL_NAME_WEIGHT = 1.7
+RES_ADDR_WEIGHT = 1
 
 
 def normalize_query(query):
     """
     Make the query lower-case and remove non-alphanumeric characters.
-    :param query:
-    :return:
     """
+    if query is None:
+        return query
     query = query.lower()
     query = ' '.join(ALPHANUMERIC_REGEX.split(query))
     return query
@@ -56,71 +47,49 @@ def construct_similarity_metric(fields, query):
     return similarity
 
 
-def user_search(query, is_typeahead, debug=False, normalize=True, limit=30):
+def voter_search(name, address, res_zip, campaign_id=None,
+                 debug=False, normalize=True, limit=30):
     """
-    Returns user search results for typeahead and non-typeahead queries.
-
-    Typeahead just involves trigram similarity, so that "adm" matches a user
-    called "admin" (for example). Typeahead results are ranked by trigram
-    similarity.
-
-    Non-typeahead search involves trigram similarity as well during
-    filtering, so we can catch "typos". However, final ranking is by
-    SearchRank, i.e. stemmed token match, with similarity only used for
-    tie-breaking.
-    :param query: string search query
-    :param is_typeahead: if True, apply typeahead logic.
-    :param debug: if True, additional info about the scoring is included
-    with the serialized results.
-    :param normalize: if True, normalize the query
+    Searches for the given Voter and returns a list of matching results.
+    :param name: string full name of Voter
+    :param address: string full residential address of Voter (or part thereof)
+    :param res_zip: string ZIP of Voter
+    :param campaign_id: if set, this is used to determine if a Voter has already
+    been validated.
+    :param debug: if True, add debug information to JSON about search.
+    :param normalize: if True, normalize the query parameters
     :param limit: if > 0, return the top "limit" results.
-    :return: list of JSON-serialized UserProfiles
+    :return: list of JSON-serialized Voters ranked in order
     """
     if normalize:
-        query = normalize_query(query)
+        name = normalize_query(name)
+        address = normalize_query(address)
+        res_zip = normalize_query(res_zip)
 
-    # Return all profiles for null or empty query
-    if query == '' or query is None:
-        profiles = UserProfile.objects.all()
-    else:
-        similarity = construct_similarity_metric(USER_TRIGRAM_SIM_FIELDS, query)
-        search_query = SearchQuery(query)
-        corpus = UserProfile.objects.select_related('user')
+    # Filter by ZIP exactly, if present
+    corpus = Voter.objects
+    if res_zip is not None:
+        corpus = corpus.filter(res_addr_zip=res_zip)
 
-        if is_typeahead:
-            # Lower threshold for trigram similarity than in non-typeahead.
-            profiles = corpus.annotate(search_similarity=similarity)\
-                .filter(Q(search_similarity__gte=0.1))\
-                .order_by('-search_similarity')
-        else:
-            profiles = corpus.annotate(
-                    search_rank=SearchRank(USER_SEARCH_VECTOR, search_query),
-                    search_similarity=similarity)\
-                .filter(
-                    Q(search_rank__gte=0.3) | Q(search_similarity__gte=0.15))\
-                .order_by('-search_rank', '-search_similarity')
+    # Use full name and address for trigram similarity computation.
+    addr_similarity = construct_similarity_metric(
+        RES_ADDR_TRIGRAM_SIM_FIELDS, address)
+    name_similarity = construct_similarity_metric(
+        FULL_NAME_TRIGRAM_SIM_FIELDS, name)
+
+    # Use weighted sum of trigram similarity for match.
+    voters = corpus.annotate(
+            name_similarity=name_similarity,
+            addr_similarity=addr_similarity)\
+        .filter(Q(name_similarity__gte=0.005) & Q(addr_similarity__gte=0.005))\
+        .annotate(search_score=FULL_NAME_WEIGHT * F('name_similarity')
+                  + RES_ADDR_WEIGHT * F('addr_similarity'))\
+        .order_by('-search_score')
 
     if limit > 0:
-        profiles = profiles[:limit]
+        voters = voters[:limit]
 
-    results = [VoterSerializer(p).serialize(debug) for p in profiles]
-    return results
-
-
-def generic_search(query, is_typeahead, debug=False, normalize=True,
-                   limit=30):
-    """
-    Synchronously carries out team and user search, and then returns the
-    results in a dict. This is apparently faster than using Celery and doing
-    the searches asynchronously, or using multiprocessing.
-    :return: dict of the form {"users": user_results, "teams": team_results}
-    """
-    if normalize:
-        query = normalize_query(query)
-
-    results = {
-        # Normalization is already taken care of
-        "users": user_search(query, is_typeahead, debug=debug, normalize=False,
-                             limit=limit),
-    }
+    voters = voters.prefetch_related('validationrecord_set')
+    results = [VoterSerializer(v).serialize(
+        debug=debug, campaign_id=campaign_id) for v in voters]
     return results

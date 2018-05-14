@@ -7,10 +7,29 @@
 }
 
 .validation-panel {
-  padding: 5px 15px 15px 15px;
   align-self: center;
   width: 95%;
   max-width: 800px;
+  padding: 15px;
+}
+
+#val-box {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+#val-box .generic-submit-button {
+  align-self: center;
+  margin-top: 10px;
+}
+
+input.val-input {
+  flex: 1 1 auto;
+  margin: 0 0 10px 0;
+  padding: 4px 4px;
+  border-radius: 3px;
+  border: 1px solid #CCC;
 }
 
 table {

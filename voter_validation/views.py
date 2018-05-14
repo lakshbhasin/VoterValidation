@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 
 from voter_validation.models import Campaign
+from voter_validation.search import voter_search
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +38,36 @@ def validate(request, campaign_id):
     """
     Shows validation UI for a given campaign, if this UserProfile is authorized
     to do data entry for the specified Campaign.
-    :param campaign_id: the campaign this UserProfile is validating for.
-    """
-    campaign = get_object_or_404(Campaign, campaign_id=int(campaign_id))
 
-    query = request.GET.get("q", None)
-    return render(request, "voter_validation/validation.html",
-                  {"campaign_name": campaign.name,
-                   "results": None})
+    This is also the endpoint for searching for Voters as part of validation. If
+    doing a search, assume that a sufficient number of the specified fields is
+    present (taken care of in front-end form validation).
+
+    :param campaign_id: the campaign this UserProfile is validating for.
+    :param request: may contain the following parameters for searching:
+    - "search": true if doing a search
+    - "name": full name of voter
+    - "address": street (residential) address of voter
+    - "zip": ZIP code
+    """
+    campaign_id = int(campaign_id)
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+    context = {"campaign_name": campaign.name}
+
+    # Search if specified in POST
+    search = request.POST.get("search", "false")
+    if search.lower() == "true":
+        name = request.POST.get("name", None)
+        address = request.POST.get("address", None)
+        res_zip = request.POST.get("zip", None)
+        voters = voter_search(name, address, res_zip)
+        context.update({
+            "name": name,
+            "address": address,
+            "zip": res_zip,
+            "results": voters,
+        })
+
+    return render(request, "voter_validation/validation.html", context)
 
 

@@ -4,7 +4,7 @@ directory of the website (see backend/urls.py).
 """
 from django.conf.urls import url
 
-from . import apis_private, views
+from voter_validation import views
 
 app_name = 'voter_validation'
 urlpatterns = [
@@ -13,7 +13,5 @@ urlpatterns = [
     url(r'^logout/$', views.logout, name='logout'),
 
     # Private APIs
-    url(r'^search_generic/$', apis_private.search_generic,
-        name='search_generic'),
-    url(r'^validate/(?P<campaign_id>[\w]+)$', views.validate, name='validate'),
+    url(r'^validate/(?P<campaign_id>[\w]+)/$', views.validate, name='validate'),
 ]

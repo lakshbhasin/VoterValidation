@@ -12,13 +12,48 @@
 {% endblock %}
 
 {% block additional_css %}
-  <link href="{% static "voter_validation/validation.css" %}" rel="stylesheet">
+    <link href="{% static "voter_validation/validation.css" %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-  <div class="justify-center align-center flex column validation-wrapper">
-    <div class="panel-default panel validation-panel flex column">
-
+    <div class="panel-default panel">
+        <h1 align="center">{{ campaign_name }} Validation</h1>
     </div>
-  </div>
+    <div class="justify-center align-center flex column validation-wrapper">
+        <div class="panel-default panel validation-panel flex column">
+            Ideally enter at least a ZIP. The more fields you fill out, the more
+            accurate the results. The search backend can work with typos. To
+            invalidate a voter, search and click the appropriate button.
+
+            <br><br>
+
+            <form name="form" method="post">
+                {% csrf_token %}
+                <div id="val-box">
+                    <input class="val-input"
+                           placeholder="Full Name"
+                           value="{{ name }}"
+                           name="name"
+                           autocomplete="off"
+                           type="text"
+                           autofocus>
+                    <input class="val-input"
+                           placeholder="Residential Address"
+                           value="{{ address }}"
+                           name="address"
+                           type="text">
+                    <input class="val-input"
+                           placeholder="ZIP Code"
+                           value="{{ zip }}"
+                           name="zip"
+                           type="text"
+                           pattern="[0-9]{0}|[0-9]{5}"
+                           required title="Must be 5 digits">
+                    <input type="hidden" value="true" name="search">
+                    <input type="submit" value="Search"
+                           class="generic-submit-button">
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

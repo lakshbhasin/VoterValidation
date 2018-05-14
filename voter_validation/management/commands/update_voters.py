@@ -27,7 +27,6 @@ VOTER_FILE_MAPPING = {
     'sNameSuffix': 'suffix',
 
     'szSitusAddress': 'res_addr',
-    'sSitusZip': 'res_addr_zip',
     'szSitusCity': 'res_addr_city',
     'sSitusState': 'res_addr_state',
     'sHouseNum': 'res_addr_house_num',
@@ -46,6 +45,17 @@ VOTER_FILE_MAPPING = {
     'sGender': 'gender',
     'szPartyName': 'party',
     'szLanguageName': 'language',
+}
+
+
+def save_zip(voter, raw_zip):
+    voter.res_addr_zip = raw_zip[:5]
+
+
+# Some fields need additional changes. Values are functions taking Voter and raw
+# parameter value.
+ADD_CHANGES_FIELDS = {
+    'sSitusZip': save_zip,
 }
 
 
@@ -72,9 +82,12 @@ class Command(BaseCommand):
                     tsv_reader = csv.DictReader(vf_tsv, delimiter='\t')
                     count = 0
                     for row in tsv_reader:
+                        # Create Voter based on row fields
                         voter = Voter()
                         for vf_name, field_name in VOTER_FILE_MAPPING.items():
                             setattr(voter, field_name, row[vf_name])
+                        for vf_name, setter in ADD_CHANGES_FIELDS.items():
+                            setter(voter, row[vf_name])
 
                         # Check if voter exists.
                         existing_voter = Voter.objects.filter(
@@ -85,6 +98,8 @@ class Command(BaseCommand):
                             for field_name in VOTER_FILE_MAPPING.values():
                                 setattr(existing_voter, field_name,
                                         getattr(voter, field_name))
+                            for vf_name, setter in ADD_CHANGES_FIELDS.items():
+                                setter(existing_voter, row[vf_name])
 
                             # Invalidate validation records if voter is inactive
                             if existing_voter.reg_status == \

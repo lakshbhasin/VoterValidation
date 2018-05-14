@@ -350,13 +350,6 @@ textarea {
   width: 100%;
 }
 
-/* Container for index's main content. Shared by some pages for things like banners. */
-.index-container {
-  margin: 0 auto;
-  width: 90%;
-  max-width: 1000px;
-}
-
 /* For errors messages */
 .invalid-details {
 	color: red;

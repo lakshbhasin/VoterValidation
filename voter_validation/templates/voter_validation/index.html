@@ -14,14 +14,12 @@
 
 {% block content %}
 
-<div class="index-container">
-    <div class="panel-default panel">
-        {% if user.is_authenticated %}
-            Foo
-        {% else %}
-            Why are you visiting this webpage?
-        {% endif %}
-    </div>
+<div class="panel-default panel">
+    {% if user.is_authenticated %}
+        <h1 align="center">SF Voter Validation Campaigns</h1>
+    {% else %}
+        Why are you visiting this webpage? You're not authorized.
+    {% endif %}
 </div>
 
 {% endblock %}

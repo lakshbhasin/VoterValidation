@@ -35,10 +35,10 @@ class VoterSerializer(Serializer):
             is_validated = self.voter.validationrecord_set.filter(
                 campaign_pk=campaign_id).count() != 0 \
                 and self.voter.reg_status == RegStatus.ACTIVE.value
-        return {
+        base_dict = {
             'id': self.voter.voter_id,
-            'name': self.voter.get_full_name(),
-            'res_addr': self.voter.res_addr,
+            'name': self.voter.full_name,
+            'address': self.voter.res_addr,
             'gender': self.voter.gender,
             'party': self.voter.party,
             'language': self.voter.language,
@@ -49,3 +49,11 @@ class VoterSerializer(Serializer):
             'is_validated': is_validated,
             'type': 'Voter',
         }
+        if debug:
+            if getattr(self.voter, 'search_score', None):
+                base_dict['search_score'] = self.voter.search_score
+            if getattr(self.voter, 'name_similarity', None):
+                base_dict['name_similarity'] = self.voter.name_similarity
+            if getattr(self.voter, 'addr_similarity', None):
+                base_dict['addr_similarity'] = self.voter.addr_similarity
+        return base_dict
