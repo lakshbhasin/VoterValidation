@@ -3,7 +3,7 @@
 A voter validation tool for petition gathering. This uses a raw txt voter file
 with a specified schema, as mentioned in update_voters.py. Voters are stored in
 a database, and fuzzy search can be used to search petition signers and mark
-them as valid. The voter file itself is stored in MVF\_YYYY\_MM\_DD.txt.
+them as valid. The voter file itself is stored in MVF\_YYYY\_MM\_DD.tsv.
 
 A lot of this was developed for the San Francisco voter file, and is only
 designed to work with a single jurisdiction's voter file. Typical users for
