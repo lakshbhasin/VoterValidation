@@ -1,0 +1,27 @@
+{% extends "voter_validation/base_generic.html" %}
+
+{% load staticfiles %}
+
+{% block title %}SF Voter Validation Campaigns{% endblock %}
+
+{% block additional_js %}
+    <script async src="{% static "js/moment.js" %}"></script>
+    <script async src="{% static "js/moment-timezone-with-data-2010-2020.js" %}"></script>
+{% endblock %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+<div class="index-container">
+    <div class="panel-default panel">
+        {% if user.is_authenticated %}
+            Foo
+        {% else %}
+            Why are you visiting this webpage?
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{# Validation interface for a campaign #}
+
+{% extends "voter_validation/base_generic.html" %}
+
+{% load staticfiles %}
+
+{% block title %}{{ campaign_name }} - Validation{% endblock %}
+
+{% block additional_js %}
+    <script async src="{% static "voter_validation/pagination.js" %}"></script>
+    <script async src="{% static "voter_validation/validation.js" %}"></script>
+{% endblock %}
+
+{% block additional_css %}
+  <link href="{% static "voter_validation/validation.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+  <div class="justify-center align-center flex column validation-wrapper">
+    <div class="panel-default panel validation-panel flex column">
+
+    </div>
+  </div>
+{% endblock %}

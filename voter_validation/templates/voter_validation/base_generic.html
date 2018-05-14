@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %}PAGE TITLE{% endblock %}</title>
+
+    {% load staticfiles %}
+    {% load compress %}
+
+    {# NOTE: All compressed CSS should be in the static folder #}
+    {% compress css %}
+      {# Site-specific CSS  #}
+      <link href="{% static "voter_validation/general.css" %}" rel="stylesheet">
+      {% block additional_css %} {% endblock %}
+    {% endcompress %}
+
+    {# NOTE: All compressed Javascript should be in the static folder #}
+    {% compress js %}
+      {# jQuery. Note that this is loaded async, so JS files will have to be aware #}
+      <script async src="{% static "voter_validation/jquery-3.1.0.min.js" %}"></script>
+      {% block additional_js %} {% endblock %}
+    {% endcompress %}
+
+    {# Ensure CSRF token is in all files so that site works on Heroku.  #}
+    {% csrf_token %}
+
+</head>
+
+<body>
+  <div id="content-wrapper" class="justify-center">
+    {# Actual content #}
+    {% block content %}
+
+    {% endblock %}
+  </div>
+
+  {# Load non-critical, below-the-fold, page-specific CSS at the end of the body. #}
+  {% compress css %}
+    {% block non_critical_css %}
+    {% endblock %}
+  {% endcompress %}
+</body>
+
+</html>

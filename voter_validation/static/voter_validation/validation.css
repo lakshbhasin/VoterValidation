@@ -1,0 +1,31 @@
+/**
+ * CSS for validation page
+ */
+
+.validation-wrapper {
+  margin-top: 20px;
+}
+
+.validation-panel {
+  padding: 5px 15px 15px 15px;
+  align-self: center;
+  width: 95%;
+  max-width: 800px;
+}
+
+table {
+  margin-top: -10px;
+}
+
+tr:nth-child(even) {
+  background-color: white;
+}
+
+tr {
+  margin-top: 12px;
+  max-height: 100px;
+}
+
+td, th {
+  border: none;
+}
