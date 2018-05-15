@@ -48,32 +48,45 @@ VOTER_FILE_MAPPING = {
 }
 
 
-def save_zip(voter, raw_zip):
-    voter.res_addr_zip = raw_zip[:5]
+def transf_zip(raw_zip):
+    return raw_zip[:5]
 
 
-# Some fields need additional changes. Values are functions taking Voter and raw
-# parameter value.
+# Some fields need additional changes. Values are functions taking raw parameter
+# and transforming it into an acceptable format for the database.
 ADD_CHANGES_FIELDS = {
-    'sSitusZip': save_zip,
+    'sSitusZip': (transf_zip, 'res_addr_zip'),
 }
 
 
 class Command(BaseCommand):
     help = 'Updates Voters based on a new master voter file'
 
+    def __init__(self):
+        super(Command, self).__init__()
+        # Count voters added or modified, and number of validation records
+        # invalidated.
+        self.voters_add = 0
+        self.voters_unmod = 0  # fields listed at top of file are unmodified
+        self.voters_mod = 0
+        self.vrs_invalidated = 0
+
     def add_arguments(self, parser):
         parser.add_argument('voter_file', type=str)
         parser.add_argument("--dry_run", action="store_true",
                             default=False, help="Dry run doesn't change DB.")
 
-    def handle(self, *args, **options):
-        # Count voters added or modified, and number of validation records
-        # invalidated.
-        voters_add = 0
-        voters_mod = 0
-        vrs_invalidated = 0
+    def print_counts(self, style=None):
+        print_str = "Voters added: %d.\nVoters unmodified: %d." \
+                    "\nVoters modified: %d.\nValidation records " \
+                    "invalidated: %d.\n\n" %\
+                    (self.voters_add, self.voters_unmod, self.voters_mod,
+                     self.vrs_invalidated)
+        if style:
+            print_str = style(print_str)
+        self.stdout.write(print_str)
 
+    def handle(self, *args, **options):
         dry_run = options['dry_run']
         try:
             with transaction.atomic():
@@ -86,8 +99,9 @@ class Command(BaseCommand):
                         voter = Voter()
                         for vf_name, field_name in VOTER_FILE_MAPPING.items():
                             setattr(voter, field_name, row[vf_name])
-                        for vf_name, setter in ADD_CHANGES_FIELDS.items():
-                            setter(voter, row[vf_name])
+                        for vf_name, (transf, field_name) \
+                                in ADD_CHANGES_FIELDS.items():
+                            setattr(voter, field_name, transf(row[vf_name]))
 
                         # Check if voter exists.
                         existing_voter = Voter.objects.filter(
@@ -95,11 +109,19 @@ class Command(BaseCommand):
                         if existing_voter.count() > 0:
                             # Voter already exists in voter file.
                             existing_voter = existing_voter.get()
-                            for field_name in VOTER_FILE_MAPPING.values():
+                            is_modified = False
+
+                            # Check and change modified fields.
+                            fields = list(VOTER_FILE_MAPPING.values())
+                            fields.extend([f[1] for f in
+                                           ADD_CHANGES_FIELDS.values()])
+                            for field_name in fields:
+                                if getattr(existing_voter, field_name) == \
+                                        getattr(voter, field_name):
+                                    continue
                                 setattr(existing_voter, field_name,
                                         getattr(voter, field_name))
-                            for vf_name, setter in ADD_CHANGES_FIELDS.items():
-                                setter(existing_voter, row[vf_name])
+                                is_modified = True
 
                             # Invalidate validation records if voter is inactive
                             if existing_voter.reg_status == \
@@ -108,36 +130,30 @@ class Command(BaseCommand):
                                         .validationrecord_set.all():
                                     vr.voter = None
                                     vr.save()
-                                    vrs_invalidated += 1
-                            existing_voter.save()
-                            voters_mod += 1
+                                    self.vrs_invalidated += 1
+                            if is_modified:
+                                self.voters_mod += 1
+                                existing_voter.save()
+                            else:
+                                self.voters_unmod += 1
                         else:
                             # New voter
                             voter.save()
-                            voters_add += 1
+                            self.voters_add += 1
 
                         count += 1
                         if count % 1000 == 0:
-                            self.stdout.write(
-                                "\nVoters added: %d.\nVoters modified: %d."
-                                "\nValidation records invalidated: %d." %
-                                (voters_add, voters_mod, vrs_invalidated))
+                            self.print_counts()
 
-                self.stdout.write("\n\n\nFinal results:")
+                self.stdout.write("\n\nFinal results:")
                 # Do nothing for dry run
                 if dry_run:
-                    self.stdout.write(
-                        "Voters added: %d.\nVoters modified: %d."
-                        "\nValidation records invalidated: %d." %
-                        (voters_add, voters_mod, vrs_invalidated))
+                    self.print_counts()
                     raise CommandError("Not saving because this is a dry run")
 
                 self.stdout.write(self.style.WARNING(
                     "Transaction almost successful!"))
-                self.stdout.write(self.style.WARNING(
-                    "Voters added: %d.\nVoters modified: %d."
-                    "\nValidation records invalidated: %d." %
-                    (voters_add, voters_mod, vrs_invalidated)))
+                self.print_counts(self.style.WARNING)
 
                 confirm = input("\nConfirm whether to update database [y/N]: ")
                 if confirm.lower() != "y":
