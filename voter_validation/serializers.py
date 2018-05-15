@@ -46,7 +46,7 @@ class VoterSerializer(Serializer):
             'orig_reg_date': self.voter.orig_reg_date,
             'reg_status': self.voter.reg_status,
             'reg_status_reason': self.voter.reg_status_reason,
-            'is_validated': is_validated,
+            'is_validated': str(is_validated).lower(),
             'type': 'Voter',
         }
         if debug:

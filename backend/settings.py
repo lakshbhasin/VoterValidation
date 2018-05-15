@@ -80,23 +80,10 @@ if not DEBUG:
     COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
     COMPRESS_STORAGE = 'backend.storage.CachedS3BotoStorage'
     STATICFILES_STORAGE = COMPRESS_STORAGE
-
-    # We will be serving from the CACHE, which gets updated when a new
-    # version is available, so a long expiry is fine.
-    AWS_HEADERS = {
-        'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
-        'Cache-Control': 'max-age=94608000',
-    }
-
 else:
     STATIC_URL = '/static/'
     COLLECTFAST_ENABLED = False
     COMPRESS_ENABLED = False
-
-# Rate-limiting
-RATELIMIT_ENABLE = True
-RATELIMIT_USE_CACHE = "default"
-RATELIMIT_VIEW = "voter_validation.views.ratelimited"
 
 # Application definition
 
@@ -113,11 +100,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.redirects',  # for redirecting herokuapp to custom domain
     'compressor',
-    'corsheaders',
-    # If debugging is desired, uncomment this line and the debug_toolbar line
-    # in MIDDLEWARE_CLASSES. Otherwise, the debug_toolbar can slow down page
-    # load times during development.
-    # 'debug_toolbar',
     'hide_herokuapp',
     'storages',  # for S3 storage of static files with django-storages and boto
 ]

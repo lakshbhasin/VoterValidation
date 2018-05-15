@@ -92,6 +92,16 @@ class Campaign(models.Model):
     def __str__(self):
         return self.name
 
+    def validation_count(self):
+        """
+        Count the number of ValidationRecords for this campaign that are for
+        non-null Voters (i.e. still valid) with ACTIVE registration status.
+        """
+        return self.validationrecord_set.filter(
+            voter__reg_status=RegStatus.ACTIVE.value,
+            voter__isnull=False)\
+            .count()
+
 
 class UserProfile(models.Model):
     """
@@ -108,6 +118,13 @@ class UserProfile(models.Model):
         return "%s (Campaigns: %s)" % \
                (self.user.username,
                 ', '.join(str(c) for c in self.campaigns.all()))
+
+    def in_campaign(self, campaign_id):
+        campaign_id = int(campaign_id)
+        for campaign in self.campaigns.all():
+            if campaign.pk == campaign_id:
+                return True
+        return False
 
 
 class ValidationRecord(models.Model):

@@ -8,7 +8,7 @@
 
 {% block additional_js %}
     <script async src="{% static "voter_validation/pagination.js" %}"></script>
-    <script async src="{% static "voter_validation/validation.js" %}"></script>
+    <script async src="{% static "voter_validation/search_results.js" %}"></script>
 {% endblock %}
 
 {% block additional_css %}
@@ -23,7 +23,7 @@
         <div class="panel-default panel validation-panel flex column">
             Ideally enter at least a ZIP. The more fields you fill out, the more
             accurate the results. The search backend can work with typos. To
-            invalidate a voter, search and click the appropriate button.
+            invalidate a voter, search again and click "Invalidate".
 
             <br><br>
 
@@ -54,6 +54,22 @@
                            class="generic-submit-button">
                 </div>
             </form>
+
+
+            {% if results|length == 0 %}
+              <script type="text/javascript">
+                var voterResults = null;
+              </script>
+            {% else %}
+              {# Transfer data from Django to JS #}
+              <script type="text/javascript">
+                  var voterResults = {{ results|safe }};
+                  var campaignId = {{ campaign_id }};
+              </script>
+              <div class="panel-default panel voter-results-panel">
+                  <table id="voter-search-table" class="w100"></table>
+              </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

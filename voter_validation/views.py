@@ -50,9 +50,12 @@ def validate(request, campaign_id):
     - "address": street (residential) address of voter
     - "zip": ZIP code
     """
+    if not request.user.userprofile.in_campaign(campaign_id):
+        return HttpResponseRedirect(reverse("voter_validation:index"))
+
     campaign_id = int(campaign_id)
     campaign = get_object_or_404(Campaign, id=campaign_id)
-    context = {"campaign_name": campaign.name}
+    context = {"campaign_name": campaign.name, "campaign_id": campaign_id}
 
     # Search if specified in POST
     search = request.POST.get("search", "false")
@@ -60,7 +63,8 @@ def validate(request, campaign_id):
         name = request.POST.get("name", None)
         address = request.POST.get("address", None)
         res_zip = request.POST.get("zip", None)
-        voters = voter_search(name, address, res_zip)
+        # Pass in campaign_id so we can check the Voter was previously validated
+        voters = voter_search(name, address, res_zip, campaign_id=campaign_id)
         context.update({
             "name": name,
             "address": address,

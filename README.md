@@ -80,7 +80,7 @@ dev headers and virtualenv.
 
 On Arch Linux:
 ```
-pacman -S postgresql libjpeg python
+pacman -S postgresql libjpeg python rabbitmq
 ```
 
 ## Configuring PostgreSQL
@@ -163,6 +163,38 @@ python manage.py update_voters backend/MVF_2018_04_02.tsv [--dry_run]
 ```
 
 # Troubleshooting
+
+## Connection Refused on Login
+This is related to Celery and RabbitMQ. It will be necessary to restart the RabbitMQ server:
+```
+# Login as root
+su
+# Stop the server (if running)
+rabbitmq-server stop
+# Restart the server as a background process and logout
+rabbitmq-server start &
+```
+
+If RabbitMQ isn't running properly on Arch Linux, see
+https://bbs.archlinux.org/viewtopic.php?id=191587 before attempting the above
+steps.
+
+## RabbitMQ Server Not Connecting on Port 5672
+
+This is an issue on some versions on Arch Linux, after a full-system upgrade.
+The error that shows up in `heroku local` is:
+```
+Cannot connect to amqp://guest:\*\*@127.0.0.1:5672//: [Errno 111] Connection refused.
+```
+
+To fix this, you can set the RABBITMQ\_NODENAME environment variable to your
+hostname when you start rabbitmq-server. You can find your hostname through the
+`hostname` command, and then issue the following command (which can be
+conveniently put in your startup script):
+
+```
+RABBITMQ_NODENAME=<your hostname> rabbitmq-server & # For Celery async tasks
+```
 
 ## PostgreSQL Not Running on Port 5432
 

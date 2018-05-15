@@ -7,7 +7,7 @@ from django.contrib.postgres.search import SearchVector, SearchRank, \
     SearchQuery, TrigramSimilarity
 from django.db.models import Q, F
 
-from .models import UserProfile, Voter
+from .models import UserProfile, Voter, RegStatus
 from .serializers import VoterSerializer
 
 ALPHANUMERIC_REGEX = re.compile(r'\W+', re.UNICODE)
@@ -15,7 +15,7 @@ ALPHANUMERIC_REGEX = re.compile(r'\W+', re.UNICODE)
 # Fields used in computing trigram similarity for Voter searches (fuzzy search)
 FULL_NAME_TRIGRAM_SIM_FIELDS = ['full_name']  # is a combination of all names
 RES_ADDR_TRIGRAM_SIM_FIELDS = ['res_addr']
-FULL_NAME_WEIGHT = 1.7
+FULL_NAME_WEIGHT = 2
 RES_ADDR_WEIGHT = 1
 
 
@@ -50,7 +50,7 @@ def construct_similarity_metric(fields, query):
 def voter_search(name, address, res_zip, campaign_id=None,
                  debug=False, normalize=True, limit=30):
     """
-    Searches for the given Voter and returns a list of matching results.
+    Searches for the given Voter and returns a list of matching Active results.
     :param name: string full name of Voter
     :param address: string full residential address of Voter (or part thereof)
     :param res_zip: string ZIP of Voter
@@ -70,6 +70,9 @@ def voter_search(name, address, res_zip, campaign_id=None,
     corpus = Voter.objects
     if res_zip is not None:
         corpus = corpus.filter(res_addr_zip=res_zip)
+
+    # Ignore non-Active registration status
+    corpus = corpus.filter(reg_status=RegStatus.ACTIVE.value)
 
     # Use full name and address for trigram similarity computation.
     addr_similarity = construct_similarity_metric(

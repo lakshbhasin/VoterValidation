@@ -6,3 +6,6 @@
 __pycache__
 venv
 *.pyc
+
+celerybeat-schedule.*
+celerybeat-schedule
