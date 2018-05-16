@@ -169,4 +169,6 @@ class ValidationRecord(models.Model):
         super(ValidationRecord, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "%s validated %s" % (self.validator, self.voter)
+        return "%s validated %s for %s" % \
+               (self.validator.user.username, self.voter.full_name,
+                self.campaign.name)
