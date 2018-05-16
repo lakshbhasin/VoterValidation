@@ -57,6 +57,7 @@ class VoterSerializer(Serializer):
             'id': self.voter.voter_id,
             'name': self.voter.full_name,
             'address': self.voter.res_addr,
+            'res_zip': self.voter.res_addr_zip,
             'gender': self.voter.gender,
             'party': self.voter.party,
             'language': self.voter.language,

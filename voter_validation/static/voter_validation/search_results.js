@@ -82,7 +82,12 @@ function generateResultsTable(resultList, tableSelector) {
     // Voter info column
     html += "<td class='voter-text'>";
     html += "<div class='voter-name'>" + result.name + "</div>";
-    html += "<div class='voter-address'>" + result.address + "</div>";
+    html += "<div class='voter-address'>" + result.address;
+    console.log(result.res_zip);
+    if (result.res_zip !== "") {
+        html += ", " + result.res_zip;
+    }
+    html += "</div>";
     var gender = result.gender.trim();
     html += "<div class='voter-misc'>" +
         "Party: " + result.party + "<br>" +
