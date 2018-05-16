@@ -43,15 +43,14 @@ yaourt -S heroku-cli
 heroku login
 ```
 
-To add the staging and production heroku remotes:
+To add the production Heroku remote:
 
 ```
-git remote add staging https://git.heroku.com/sf-voter-validation-staging.git
 git remote add heroku https://git.heroku.com/sf-voter-validation.git
 ```
 
-And you should be all set up to push to staging and production (if
-you have been given push access).
+And you should be all set up to push to production (if you have been given
+push access).
 
 
 # Local Runbook
@@ -68,7 +67,6 @@ bashrc, etc and make sure to `source` that file.
 
 ```
 export VOTER_VALIDATION_DEBUG=1
-export VOTER_VALIDATION_SITE_NAME='http://127.0.0.1:8000'
 # Note: these keys are not used in production.
 export VOTER_VALIDATION_DJANGO_SECRET_KEY='ajtfsdcba22=)^_-d_1&^hp8p16c&iyvbw(rocl*001_u7_1)(a'
 ```

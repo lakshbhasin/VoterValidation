@@ -82,9 +82,10 @@ function generateResultsTable(resultList, tableSelector) {
     html += "<td class='voter-text'>";
     html += "<div class='voter-name'>" + result.name + "</div>";
     html += "<div class='voter-address'>" + result.address + "</div>";
+    var gender = result.gender.trim();
     html += "<div class='voter-misc'>" +
         "Party: " + result.party + "<br>" +
-        (result.gender === "" ? "" : "Gender: " + result.gender + "<br>") +
+        (gender === "" ? "" : "Gender: " + gender + "<br>") +
         "Latest registration date: " + result.curr_reg_date +
         "</div>";
     html += "</td>";

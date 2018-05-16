@@ -39,7 +39,6 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
 
 # Site-related settings
-SITE_NAME = os.environ.get("VOTER_VALIDATION_SITE_NAME", "error")
 
 # Allowed hosts (Heroku recommendation).
 ALLOWED_HOSTS = ["*"]
