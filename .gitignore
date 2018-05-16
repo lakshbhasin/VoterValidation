@@ -9,3 +9,6 @@ venv
 
 celerybeat-schedule.*
 celerybeat-schedule
+
+# Ignore Master Voter Files due to size
+MVF_*.tsv

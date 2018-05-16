@@ -28,7 +28,6 @@ If you don't already have git:
 sudo apt-get install git
 ```
 
-Also, install [Git Large File Storage](https://git-lfs.github.com/).
 
 To pull down the repository:
 
@@ -51,7 +50,6 @@ git remote add heroku https://git.heroku.com/sf-voter-validation.git
 
 And you should be all set up to push to production (if you have been given
 push access).
-
 
 # Local Runbook
 
@@ -155,9 +153,10 @@ The web server will run at localhost:5000.
 ## Updating Voter File
 
 You can use the `update_voters` script to update the voter file in an atomic
-transaction, with confirmation required before finalizing changes.
+transaction, with confirmation required before finalizing changes. If your
+Master Voter File is in TSV format and in the backend folder:
 ```
-python manage.py update_voters backend/MVF_2018_04_02.tsv [--dry_run]
+python manage.py update_voters backend/MVF_2018_05_07.tsv [--dry_run]
 ```
 
 # Troubleshooting

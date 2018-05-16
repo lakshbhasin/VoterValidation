@@ -22,7 +22,7 @@ lockfile==0.12.2
 mock==2.0.0
 newrelic==2.80.1.61
 pbr==4.0.2
-psycopg2==2.7.4
+psycopg2-binary==2.7.4
 python-dateutil==2.4.2
 pytz==2016.10
 rcssmin==1.0.6
