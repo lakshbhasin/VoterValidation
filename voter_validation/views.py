@@ -9,16 +9,21 @@ from django.views.decorators.http import require_http_methods
 
 from voter_validation.models import Campaign
 from voter_validation.search import voter_search
+from voter_validation.serializers import CampaignSerializer
 
 logger = logging.getLogger(__name__)
 
 
 def index(request):
     """
-    The index view, for the home page.
+    The index view, for the home page. Shows Campaigns this UserProfile is in.
     :param request:
     """
     context = dict()
+    if request.user.is_authenticated():
+        context['campaigns'] = [
+            CampaignSerializer(c).serialize() for c in
+            request.user.userprofile.campaigns.order_by('pk')]
     return render(request, 'voter_validation/index.html', context)
 
 
@@ -73,5 +78,3 @@ def validate(request, campaign_id):
         })
 
     return render(request, "voter_validation/validation.html", context)
-
-

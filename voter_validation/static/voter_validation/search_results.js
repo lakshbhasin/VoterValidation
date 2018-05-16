@@ -76,7 +76,8 @@ function generateResultsTable(resultList, tableSelector) {
     // Validation column
     var isValidated = result.is_validated === "true";
     var validatedText = isValidated ? "Yes" : "No";
-    html += "<td class='validated-result'>" + validatedText + "</td>";
+    html += "<td class='validated-result-" + validatedText.toLowerCase() +
+        "'>" + validatedText + "</td>";
 
     // Voter info column
     html += "<td class='voter-text'>";

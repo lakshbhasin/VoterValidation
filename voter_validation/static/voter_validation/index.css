@@ -1,0 +1,34 @@
+#campaign-progress {
+    align-items: center;
+    justify-content: center;
+}
+
+.campaign-info {
+    padding: 6px 0 5px 0;
+}
+
+.campaign-name {
+    font-size: large;
+    font-weight: bold;
+    align-self: center;
+}
+
+.val-count {
+    text-align: center;
+}
+
+.val-button {
+    margin-top: 15px;
+}
+
+.campaign-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: 5px 15px 5px 0;
+    padding: 10px;
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    max-width: 300px;
+    background-color: white;
+}

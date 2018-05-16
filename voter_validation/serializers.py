@@ -18,6 +18,24 @@ class Serializer(object):
         raise NotImplemented()
 
 
+class CampaignSerializer(Serializer):
+    """
+    Used to create a serialized dict of a Campaign.
+    """
+    def __init__(self, campaign, *args, **kwargs):
+        super(CampaignSerializer, self).__init__(*args, **kwargs)
+        self.campaign = campaign
+
+    def serialize(self, debug=False):
+        return {
+            'id': self.campaign.pk,
+            'name': self.campaign.name,
+            'validation_goal': self.campaign.validation_goal,
+            'validation_count': self.campaign.validation_count(),
+            'type': 'Campaign',
+        }
+
+
 class VoterSerializer(Serializer):
     """
     Used to create a serialized dict of a voter. The details here will be

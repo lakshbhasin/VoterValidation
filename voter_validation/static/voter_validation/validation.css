@@ -48,8 +48,13 @@ input.val-input {
   padding: 10px;
 }
 
-td.validated-result, td.invalidation-action, td.validation-action {
+td.validated-result-yes, td.invalidation-action, td.validation-action {
   font-size: larger;
+}
+
+td.validated-result-yes {
+  font-weight: bold;
+  color: #3498DB;
 }
 
 td .voter-address {
