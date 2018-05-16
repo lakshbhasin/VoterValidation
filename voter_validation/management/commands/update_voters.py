@@ -9,10 +9,17 @@ Very rare case for most campaigns, and elections officials seem to set them
 to Inactive first.
 
 Usage:
-   python update_voters.py <voter_file_path> [--dry_run]
+   python update_voters.py <mvf_tsv_url> [--dry_run]
+
+mvf_tsv_url is a URL pointing to where the Master Voter File is stored as a
+TSV, e.g. on S3 or Cloudfront.
 """
+import codecs
 import csv
 
+from contextlib import closing
+
+import requests
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -72,7 +79,7 @@ class Command(BaseCommand):
         self.vrs_invalidated = 0
 
     def add_arguments(self, parser):
-        parser.add_argument('voter_file', type=str)
+        parser.add_argument('mvf_tsv_url', type=str)
         parser.add_argument("--dry_run", action="store_true",
                             default=False, help="Dry run doesn't change DB.")
 
@@ -88,11 +95,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options['dry_run']
+        url = options['mvf_tsv_url']
         try:
             with transaction.atomic():
-                with open(options['voter_file'], 'r', encoding='latin1') \
-                        as vf_tsv:
-                    tsv_reader = csv.DictReader(vf_tsv, delimiter='\t')
+                with closing(requests.get(url, stream=True)) as r:
+                    tsv_reader = csv.DictReader(
+                        codecs.iterdecode(r.iter_lines(), 'latin1'),
+                        delimiter='\t')
                     count = 0
                     for row in tsv_reader:
                         # Create Voter based on row fields

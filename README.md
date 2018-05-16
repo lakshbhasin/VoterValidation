@@ -153,11 +153,12 @@ The web server will run at localhost:5000.
 ## Updating Voter File
 
 You can use the `update_voters` script to update the voter file in an atomic
-transaction, with confirmation required before finalizing changes. If your
-Master Voter File is in TSV format and in the backend folder:
+transaction, with confirmation required before finalizing changes.
 ```
-python manage.py update_voters backend/MVF_2018_05_07.tsv [--dry_run]
+python manage.py update_voters <mvf_tsv_url> [--dry_run]
 ```
+
+Where `mvf_tsv_url` is a URL holding the Master Voter File as a TSV.
 
 # Troubleshooting
 
