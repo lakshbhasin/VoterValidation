@@ -2,7 +2,7 @@
  * Code for displaying Voter search results and allowing validation
  */
 
-var VOTER_RESULTS_PER_PAGE = 10;
+var VOTER_RESULTS_PER_PAGE = 30;
 
 // Defer until JQuery, pagination, required data are present.
 function deferSearchResults(method) {

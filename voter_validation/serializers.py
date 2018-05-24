@@ -75,4 +75,6 @@ class VoterSerializer(Serializer):
                 base_dict['name_similarity'] = self.voter.name_similarity
             if getattr(self.voter, 'addr_similarity', None):
                 base_dict['addr_similarity'] = self.voter.addr_similarity
+            if getattr(self.voter, 'addr_exact_match', None):
+                base_dict['addr_exact_match'] = self.voter.addr_exact_match
         return base_dict

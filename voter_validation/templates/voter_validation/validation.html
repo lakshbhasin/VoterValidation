@@ -21,11 +21,11 @@
     </div>
     <div class="justify-center align-center flex column validation-wrapper">
         <div class="panel-default panel validation-panel flex column">
-            Enter at least a ZIP, which is used to filter results (and should
-            be exactly right). The more fields you fill out, the more
-            accurate the results. The search backend can work with typos and
-            partial or inexact matches (e.g. last names only, parts of a street
-            address). To invalidate a voter, search again and click "Invalidate".
+            Entering an exact ZIP will help filter results and speed things up.
+            The more fields you fill out, the more accurate the results. The
+            search backend can work with typos and partial or inexact matches
+            (e.g. last names only, parts of a street address). To invalidate a
+            voter, search again and click "Invalidate".
 
             <br><br>
 
@@ -48,9 +48,7 @@
                            placeholder="ZIP Code"
                            value="{{ zip }}"
                            name="zip"
-                           type="text"
-                           pattern="[0-9]{0}|[0-9]{5}"
-                           required title="Must be 5 digits">
+                           type="text">
                     <input type="hidden" value="true" name="search">
                     <input type="submit" value="Search"
                            class="generic-submit-button">

@@ -39,11 +39,13 @@ class Command(BaseCommand):
     def print_results(self, results):
         for result in results:
             self.stdout.write('%s @ %s -- Score: %.2f. Name similarity: %.2f. '
-                              'Address similarity: %.2f.' %
+                              'Address similarity: %.2f. '
+                              'Exact address match: %.2f' %
                               (result['name'], result['address'],
                                result['search_score'],
                                result.get('name_similarity', 0),
-                               result.get('addr_similarity', 0)))
+                               result.get('addr_similarity', 0),
+                               result.get('addr_exact_match', 0)))
 
     def handle(self, *args, **options):
         name = options['name']
