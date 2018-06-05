@@ -9,7 +9,7 @@ Very rare case for most campaigns, and elections officials seem to set them
 to Inactive first.
 
 Usage:
-   python update_voters.py <mvf_tsv_url> [--dry_run]
+   python manage.py update_voters <mvf_tsv_url> [--dry_run]
 
 mvf_tsv_url is a URL pointing to where the Master Voter File is stored as a
 TSV, e.g. on S3 or Cloudfront.
