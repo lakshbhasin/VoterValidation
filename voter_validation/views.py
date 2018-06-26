@@ -66,7 +66,7 @@ def validate(request, campaign_id):
     # Get the number of signatures validated by the current user for this
     # campaign, and also for the past 24 hours.
     val_sigs_set = ValidationRecord.objects.filter(
-        validator__user=request.user, campaign=campaign)
+        validator=request.user.userprofile, campaign=campaign)
     val_sigs_24h = val_sigs_set.filter(
         last_updated__gte=datetime.now(SERVER_TIME_ZONE) - timedelta(hours=24))
 

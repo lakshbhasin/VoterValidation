@@ -138,7 +138,8 @@ class ValidationRecord(models.Model):
     # Who validated this Voter, and date of last update for record
     validator = models.ForeignKey(UserProfile, null=True,
                                   on_delete=models.SET_NULL)
-    last_updated = models.DateTimeField(default=timezone.now, blank=True)
+    last_updated = models.DateTimeField(default=timezone.now, blank=True,
+                                        db_index=True)
 
     # Campaign this Voter was validated for, and PK (for uniqueness constraint)
     campaign = models.ForeignKey(Campaign, null=True, on_delete=models.SET_NULL,
