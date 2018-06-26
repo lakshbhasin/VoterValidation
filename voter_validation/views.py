@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -7,7 +8,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 
-from voter_validation.models import Campaign
+from backend.settings import SERVER_TIME_ZONE
+from voter_validation.models import Campaign, ValidationRecord
 from voter_validation.search import voter_search
 from voter_validation.serializers import CampaignSerializer
 
@@ -60,7 +62,20 @@ def validate(request, campaign_id):
 
     campaign_id = int(campaign_id)
     campaign = get_object_or_404(Campaign, id=campaign_id)
-    context = {"campaign_name": campaign.name, "campaign_id": campaign_id}
+
+    # Get the number of signatures validated by the current user for this
+    # campaign, and also for the past 24 hours.
+    val_sigs_set = ValidationRecord.objects.filter(
+        validator__user=request.user, campaign=campaign)
+    val_sigs_24h = val_sigs_set.filter(
+        last_updated__gte=datetime.now(SERVER_TIME_ZONE) - timedelta(hours=24))
+
+    context = {
+        "campaign_name": campaign.name,
+        "campaign_id": campaign_id,
+        "val_sigs": val_sigs_set.count(),
+        "val_sigs_24h": val_sigs_24h.count(),
+    }
 
     # Search if specified in POST
     search = request.POST.get("search", "false")

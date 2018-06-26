@@ -21,6 +21,13 @@
     </div>
     <div class="justify-center align-center flex column validation-wrapper">
         <div class="panel-default panel validation-panel flex column">
+            Welcome back, {{ request.user.username }}! You've validated
+            {{ val_sigs }} signatures for {{ campaign_name }} overall,
+            and {{ val_sigs_24h }} signatures in the past 24 hours.
+
+            <br><br>
+
+            <b>Instructions:</b>
             Entering an exact ZIP will help filter results and speed things up.
             The more fields you fill out, the more accurate the results. The
             search backend can work with typos and partial or inexact matches
