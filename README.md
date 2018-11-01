@@ -5,6 +5,12 @@ with a specified schema, as mentioned in update_voters.py. Voters are stored in
 a database, and fuzzy search can be used to search petition signers and mark
 them as valid. The voter file itself is stored in MVF\_YYYY\_MM\_DD.tsv.
 
+This tool can allow grassroots campaigns to run low-cost petition validation
+software on Heroku to validate petition signatures against a voter file,
+without having to pay for proprietary software. It has features like fuzzy
+search and a simple search ranking algorithm using trigram similarity and exact
+text match, with some speed optimizations.
+
 A lot of this was developed for the San Francisco voter file, and is only
 designed to work with a single jurisdiction's voter file. Typical users for
 this kind of tool would be campaign staff and volunteers looking to validate
