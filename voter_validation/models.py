@@ -32,9 +32,9 @@ class Voter(models.Model):
 
     # Name-related parameters
     first_name = models.CharField(max_length=32, default='')
-    middle_name = models.CharField(max_length=32, default='')
+    middle_name = models.CharField(max_length=32, default='', blank=True)
     last_name = models.CharField(max_length=32, default='')
-    suffix = models.CharField(max_length=32, default='')
+    suffix = models.CharField(max_length=32, default='', blank=True)
 
     # Combination of above name parameters. Created on save.
     full_name = models.CharField(max_length=128, default='', blank=True,
@@ -46,27 +46,30 @@ class Voter(models.Model):
     res_addr_zip = models.CharField(max_length=5, default='', db_index=True)
     res_addr_city = models.CharField(max_length=30, default='')
     res_addr_state = models.CharField(max_length=2, default='')
-    res_addr_house_num = models.CharField(max_length=10, default='')
-    res_addr_street_name = models.CharField(max_length=35, default='')
-    res_addr_street_suff = models.CharField(max_length=10, default='')
-    res_addr_unit_num = models.CharField(max_length=8, default='')
+    res_addr_house_num = models.CharField(max_length=10, default='', blank=True)
+    res_addr_street_name = models.CharField(
+        max_length=35, default='', blank=True)
+    res_addr_street_suff = models.CharField(
+        max_length=10, default='', blank=True)
+    res_addr_unit_num = models.CharField(
+        max_length=8, default='', blank=True)
 
     # Voter contact information (not shown in UI)
-    phone = models.CharField(max_length=14, default='')
-    email = models.CharField(max_length=100, default='')
+    phone = models.CharField(max_length=14, default='', blank=True)
+    email = models.CharField(max_length=100, default='', blank=True)
 
     # Registration characteristics and status. Dates usually MM/DD/YYYY.
-    curr_reg_date = models.CharField(max_length=10, default='')
-    orig_reg_date = models.CharField(max_length=10, default='')
+    curr_reg_date = models.CharField(max_length=10, default='', blank=True)
+    orig_reg_date = models.CharField(max_length=10, default='', blank=True)
     reg_status = models.CharField(
         max_length=1, choices=RegStatus.choices(), db_index=True,
         default=str(RegStatus.NONE.value))
-    reg_status_reason = models.CharField(max_length=50, default='')
+    reg_status_reason = models.CharField(max_length=50, default='', blank=True)
 
     # Other voter characteristics
-    gender = models.CharField(max_length=1, default='')
-    party = models.CharField(max_length=50, default='')
-    language = models.CharField(max_length=16, default='')
+    gender = models.CharField(max_length=1, default='', blank=True)
+    party = models.CharField(max_length=50, default='', blank=True)
+    language = models.CharField(max_length=16, default='', blank=True)
 
     def __str__(self):
         return "%s (%s)" % (self.full_name, self.res_addr)
