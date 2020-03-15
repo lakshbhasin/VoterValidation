@@ -1,15 +1,9 @@
 """
-Asynchronous and periodic tasks run by Celery, on one worker node. Note that
-this uses RabbitMQ, not redis, so the results are not stored anywhere. The
-tasks in this module are just supposed to run, and not return results.
+Asynchronous and periodic tasks run by Celery on one worker node. Note that
+this uses redis. The tasks in this module are just supposed to run and interact
+with the database, and not return results.
 
-Both asynchronous and periodic tasks run on the same Celery worker node. To
-run celery, run the following command:
-
-    celery -A call_tracker worker -B -l info -c 4
-
-Where -c represents the concurrency, and -B makes sure we use the celery beat
-service (for periodic jobs).
+To run celery, see the command in the Procfile.
 """
 from __future__ import absolute_import  # So we use the right celery
 
@@ -17,22 +11,28 @@ import logging
 
 from celery import shared_task
 
-from voter_validation.models import ValidationRecord
+from voter_validation.models import ValidationRecord, Voter, Campaign, \
+    UserProfile
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task
-def validate_voter(voter, campaign, val, validator):
+def validate_voter(voter_id, campaign_id, val, validator_username):
     """
     Validates the given voter for the specified campaign.
-    :param voter: Voter
-    :param campaign: Campaign for which voter is validated
+    :param voter_id: Voter ID
+    :param campaign_id: Campaign ID for which voter is being validated
     :param val: boolean value indicating whether to validate (True) or
     invalidate (False).
-    :param validator: UserProfile that validated this campaign.
+    :param validator_username: username of User that validated this campaign.
     :return saved ValidationRecord, or None in the case of invalidation
     """
+    # Look up objects based on given IDs.
+    voter = Voter.objects.get(voter_id=voter_id)
+    campaign = Campaign.objects.get(pk=campaign_id)
+    validator = UserProfile.objects.get(user__username=validator_username)
+
     # Check if validation record already exists.
     prev_vr = ValidationRecord.objects.filter(voter=voter, campaign=campaign)
     if prev_vr.count() != 0:
@@ -46,7 +46,8 @@ def validate_voter(voter, campaign, val, validator):
             return None
     else:
         if val:
-            vr = ValidationRecord(voter=voter, campaign=campaign,
+            vr = ValidationRecord(voter=voter,
+                                  campaign=campaign,
                                   validator=validator)
             vr.save()
             return vr

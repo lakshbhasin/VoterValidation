@@ -15,7 +15,7 @@ class Serializer(object):
         Should return a dict of data represented by this serializer.
         :param debug: if True, include additional info in each object
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class CampaignSerializer(Serializer):

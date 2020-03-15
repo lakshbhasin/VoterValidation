@@ -4,7 +4,7 @@ Private APIs (as linked to by urls.py)
 from django.views.decorators.csrf import csrf_exempt
 
 from voter_validation.common import create_json_response, bad_request
-from voter_validation.models import Campaign, Voter
+from voter_validation.models import Voter
 from voter_validation.tasks import validate_voter
 
 
@@ -37,13 +37,13 @@ def validation_api(request):
     voter = Voter.objects.filter(voter_id=voter_id)
     if voter.count() == 0:
         return bad_request("Invalid request: invalid Voter ID specified.")
-    voter = voter.get()
 
     # Asynchronously validate/invalidate voter.
     val = request.POST.get("val", "false").lower() == "true"
-    campaign = Campaign.objects.get(pk=campaign_id)
-    validate_voter.delay(voter=voter, campaign=campaign,
-                         val=val, validator=request.user.userprofile)
+    validate_voter.delay(voter_id=voter_id,
+                         campaign_id=campaign_id,
+                         val=val,
+                         validator_username=request.user.username)
     return create_json_response({
         "result": "success",
         "message": "Voter asynchronously saved",

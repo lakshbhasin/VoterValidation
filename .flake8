@@ -1,0 +1,3 @@
+[flake8]
+exclude = .git,__pycache__,venv,voter_validation/migrations/
+max-line-length = 100

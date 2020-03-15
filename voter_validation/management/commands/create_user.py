@@ -15,8 +15,8 @@ class Command(BaseCommand):
             try:
                 admin = User.objects.filter(username=username).get()
                 user_profile = UserProfile(user=admin)
-            except:
-                raise CommandError('User "%s" does not exist' % username)
+            except Exception as e:
+                raise CommandError('User "%s" does not exist: %s' % username, e)
 
             user_profile.save()
             self.stdout.write(self.style.SUCCESS(

@@ -3,7 +3,7 @@
 A voter validation tool for petition gathering. This uses a raw txt voter file
 with a specified schema, as mentioned in update_voters.py. Voters are stored in
 a database, and fuzzy search can be used to search petition signers and mark
-them as valid. The voter file itself is stored in MVF\_YYYY\_MM\_DD.tsv.
+them as valid. The voter file itself is stored as MVF\_YYYY\_MM\_DD.tsv.
 
 This tool can allow grassroots campaigns to run low-cost petition validation
 software on Heroku to validate petition signatures against a voter file,
@@ -16,7 +16,7 @@ designed to work with a single jurisdiction's voter file. Typical users for
 this kind of tool would be campaign staff and volunteers looking to validate
 signatures to qualify a ballot measure.
 
-DISCLAIMER: It is illegal to use signatures on an initiative petition in CA for
+DISCLAIMER: It is illegal to use signatures on an initiative petition in California for
 a purpose other than qualification of the proposed measure for the ballot.
 Petitions cannot be used to create or add to mailing lists or similar lists
 for any purpose, including fundraising or requests for support. Any such misuse
@@ -33,7 +33,6 @@ If you don't already have git:
 ```
 sudo apt-get install git
 ```
-
 
 To pull down the repository:
 
@@ -59,21 +58,9 @@ push access).
 
 # Local Runbook
 
-Note: The following instructions assume you have Python 3.6.4+, which is
+Note: The following instructions assume you have Python 3.8.2+, which is
 referred to as just "python". If "python" points to "python2" on your computer,
 please take note of this key difference!
-
-## Environment Variables
-
-In order to run the website locally, you'll first have to make sure the following
-environment variables have been set. Add the following lines to your zshrc,
-bashrc, etc and make sure to `source` that file.
-
-```
-export VOTER_VALIDATION_DEBUG=1
-# Note: these keys are not used in production.
-export VOTER_VALIDATION_DJANGO_SECRET_KEY='ajtfsdcba22=)^_-d_1&^hp8p16c&iyvbw(rocl*001_u7_1)(a'
-```
 
 ## Installing Non-Python Requirements
 Install postgresql and dev headers from your package manager, and
@@ -82,7 +69,7 @@ dev headers and virtualenv.
 
 On Arch Linux:
 ```
-pacman -S postgresql libjpeg python rabbitmq
+pacman -S postgresql python redis flake8
 ```
 
 ## Configuring PostgreSQL
@@ -116,9 +103,9 @@ Install all of the Python requirements inside a virtualenv, in the root
 directory of the project:
 
 ```
-pyvenv python3 venv
+python3.8 -m pip install --user virtualenv
+python3.8 -m virtualenv venv
 source venv/bin/activate
-export LC_ALL=en_US.UTF-8  # for ascii codec issues
 pip install -r requirements.txt
 ```
 
@@ -128,6 +115,19 @@ create an alias that "cd"s into the repo directory and sources the virtualenv,
 to make development easier.
 
 ## Local Website Setup
+If any environment variables can't be found, you can source the .env file 
+and export all of its variables:
+```
+set -a
+source .env
+set +a
+```
+A helpful alias for development and opening new terminal windows (change 
+~/Documents/code/VoterValidation to your repo location):
+```
+alias voterval='cd ~/Documents/code/VoterValidation && set -a && source .env && set +a && source venv/bin/activate'
+```
+
 You then need to migrate any DB changes as follows:
 
 ```
@@ -156,6 +156,9 @@ heroku local
 
 The web server will run at localhost:5000.
 
+## Lint
+Run `flake8` to lint and correct style issues.
+
 ## Updating Voter File
 
 You can use the `update_voters` script to update the voter file in an atomic
@@ -167,38 +170,6 @@ python manage.py update_voters <mvf_tsv_url> [--dry_run]
 Where `mvf_tsv_url` is a URL holding the Master Voter File as a TSV.
 
 # Troubleshooting
-
-## Connection Refused on Login
-This is related to Celery and RabbitMQ. It will be necessary to restart the RabbitMQ server:
-```
-# Login as root
-su
-# Stop the server (if running)
-rabbitmq-server stop
-# Restart the server as a background process and logout
-rabbitmq-server start &
-```
-
-If RabbitMQ isn't running properly on Arch Linux, see
-https://bbs.archlinux.org/viewtopic.php?id=191587 before attempting the above
-steps.
-
-## RabbitMQ Server Not Connecting on Port 5672
-
-This is an issue on some versions on Arch Linux, after a full-system upgrade.
-The error that shows up in `heroku local` is:
-```
-Cannot connect to amqp://guest:\*\*@127.0.0.1:5672//: [Errno 111] Connection refused.
-```
-
-To fix this, you can set the RABBITMQ\_NODENAME environment variable to your
-hostname when you start rabbitmq-server. You can find your hostname through the
-`hostname` command, and then issue the following command (which can be
-conveniently put in your startup script):
-
-```
-RABBITMQ_NODENAME=<your hostname> rabbitmq-server & # For Celery async tasks
-```
 
 ## PostgreSQL Not Running on Port 5432
 
