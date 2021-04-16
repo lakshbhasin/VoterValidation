@@ -12,7 +12,7 @@ dj-static==0.0.6
 Django==1.11.28
 django-appconf==1.0.2
 django-compressor==2.1.1
-django-debug-toolbar==1.7
+django-debug-toolbar==1.11.1
 django-hide-herokuapp==0.4
 django-ipware==1.1.6
 django-storages==1.5.2
